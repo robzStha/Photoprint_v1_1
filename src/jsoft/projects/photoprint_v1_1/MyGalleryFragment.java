@@ -111,7 +111,17 @@ public class MyGalleryFragment extends Fragment {
 		super.onStop();
 	}
 
-	
+	public void btnChoosePhotosClick(View v){
+		
+		final ArrayList<String> selectedItems = imageAdapter.getCheckedItems();
+		
+		dialog = ProgressDialog.show(context, "", "Uploading file...",true);
+		new Thread(new Runnable(){
+			public void run(){
+				UploadFile(selectedItems);
+			}
+		}).start();
+	}
 	
 	public class ImageAdapter extends BaseAdapter{
 		
