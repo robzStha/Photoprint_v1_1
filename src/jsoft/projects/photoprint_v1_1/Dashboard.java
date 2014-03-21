@@ -196,57 +196,23 @@ public class Dashboard extends Activity {
     		case 4:
     			fragment = new MyGalleryFragment();
     			break;
-    		case 5:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 6:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 7:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 8:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 9:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 10:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 11:
-    			fragment = new PlanetFragment();
-    			break;
-    		case 12:
-    			fragment = new PlanetFragment();
-    			break;
     			
 			default:
 				break;
     	}
     	
-    	if(position>=5){
-    		Bundle args = new Bundle();
-    		args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-    		fragment.setArguments(args);
-    		if(fragment != null){
-        		FragmentManager fragmentManager = getFragmentManager();
-        		fragmentManager.beginTransaction()
-        						.replace(R.id.content_frame, fragment)
-        						.commit();
-        		
-        		mDrawerList.setItemChecked(position, true);
-        		mDrawerList.setSelection(position);
-        		setTitle(mPlanetTitles[position]);
-        		mDrawerLayout.closeDrawer(mDrawerList);
-        	}
-    	}else{
-    		Intent i = new Intent(Dashboard.this, MyGallery.class);
-			// i.putExtra("urString", true);
-//			i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(i);
+
+    	if(fragment != null){
+    		FragmentManager fragmentManager = getFragmentManager();
+    		fragmentManager.beginTransaction()
+    						.replace(R.id.content_frame, fragment)
+    						.commit();
+    		
+    		mDrawerList.setItemChecked(position, true);
+    		mDrawerList.setSelection(position);
+    		setTitle(mPlanetTitles[position]);
+    		mDrawerLayout.closeDrawer(mDrawerList);
     	}
-    	
     	
 
     	Toast.makeText(getApplicationContext(), Integer.toString(position), Toast.LENGTH_LONG).show();
@@ -276,50 +242,7 @@ public class Dashboard extends Activity {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggles
         mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    /**
-     * Fragment that appears in the "content_frame", shows a planet
-     */
-    public static class PlanetFragment extends Fragment {
-        public static final String ARG_PLANET_NUMBER = "planet_number";
-
-        public PlanetFragment() {
-            // Empty constructor required for fragment subclasses
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_planet, container, false);
-            int i = getArguments().getInt(ARG_PLANET_NUMBER);
-            String planet = getResources().getStringArray(R.array.planets_array)[i];
-
-            int imageId = getResources().getIdentifier(planet.toLowerCase(Locale.getDefault()),
-                            "drawable", getActivity().getPackageName());
-            ((ImageView) rootView.findViewById(R.id.image)).setImageResource(imageId);
-            getActivity().setTitle(planet);
-            return rootView;
-        }
-    }
-    
-    
-//    public void btnChoosePhotosClick(View v){
-//		
-////		ImageAdapter imageAdapter = new ImageAdapter(this, null);
-//		final ArrayList<String> selectedItems = imageAdapter.getCheckedItems();
-////		
-//		dialog = ProgressDialog.show(this, "", "Uploading file...",true);
-//		new Thread(new Runnable(){
-//			public void run(){
-////				UploadFile(selectedItems);
-//			}
-//		}).start();
-//		
-//		
-//		Toast.makeText(this, " Total photos selected: "+selectedItems.size(), Toast.LENGTH_SHORT).show();
-//		//Log.d(Gallery.class.getSimpleName(), "Selected Items: " + selectedItems.toString());
-//	}
+    }   
     
     
 }
