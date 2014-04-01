@@ -7,20 +7,45 @@
     <string name="btnLogin">Login</string>
     <string name="pwd">Password</string>
     <string name="un">Username</string>
-    <string name="uploadMsg">Select Images to upload</string>
+    <string name="uploadMsg">Please choose images to print</string>
     <string name="app_id">232382423552157</string>
     <string name="application_id">232382423552157</string>
     <string name="albumMsg">Please select one of your albums</string>
-    <string-array name="planets_array">
+    <string-array name="menu_array">
         <item>MyGallery</item>
-        <item>FbLogin</item>
+        <item>Facebook</item>
         <item>Profile</item>
         <item>Order History</item>
+        <item>Cart</item>
         <item>Logout</item>
     </string-array>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_websearch">Web search</string>
     <string name="app_not_available">Sorry, there\'s no web browser available</string>
-
+    <string name="btnSelect">Select</string>
+    <string name="cart">Cart</string>
+    <string name="add_more">Add More</string>
+    <string name="desc_list_item_icon">Icons</string>
+    
+	<string-array name="sizes">
+	    <item>3.25 x 4.5</item>
+	    <item>3.5 x 5</item>
+	    <item>3.5 x 8.1</item>
+	    <item>3.9 x 5.8</item>
+	    <item>4.7 x 9.3</item>
+	    <item>5.8 x 7.9</item>
+	    <item>4 x 6</item>
+	</string-array>
+	
+	<array name="menu_icons">
+        <item>@drawable/ic_action_select_all</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_user</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/cart</item>
+        <item>@drawable/ic_action_new</item>
+    </array>
+    
+    
 </resources>

@@ -1,37 +1,32 @@
 package jsoft.projects.photoprint_v1_1;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
-import jsoft.projects.photoprint_v1_1.libs.ConnectionMngr;
+import jsoft.projects.photoprint_v1_1.cart.ShoppingCart;
 import jsoft.projects.photoprint_v1_1.libs.SessionMngr;
 import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -39,17 +34,15 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 public class MyGalleryFragment extends Fragment {
-
+	
 	public ImageLoader imageLoader = ImageLoader.getInstance();
 	
 	Context context;
 	
-	public MyGalleryFragment() {}
+	public MyGalleryFragment(){}
 	
-	private ProgressDialog dialog = null;
-	private int serverResponseCode = 0;
 	public String imgPath = null;
-	String upLoadServerUri = "http://www.jhamel.com/print/UploadToServer.php";
+//	String upLoadServerUri = "http://www.jhamel.com/print/ah_login_api/UploadToServer.php";
 	
 	SessionMngr session;
 	
@@ -86,7 +79,6 @@ public class MyGalleryFragment extends Fragment {
             int dataColumnIndex = imagecursor.getColumnIndex(MediaStore.Images.Media.DATA);
             imageUrls.add(imagecursor.getString(dataColumnIndex));
  
-            System.out.println("=====> Array path => "+imageUrls.get(i));
         }
  
         options = new DisplayImageOptions.Builder()
@@ -97,7 +89,6 @@ public class MyGalleryFragment extends Fragment {
             .build();
         
         imageAdapter = new ImageAdapter(context, imageUrls);
-        
         
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setAdapter(imageAdapter);
@@ -113,14 +104,21 @@ public class MyGalleryFragment extends Fragment {
 
 	public void btnChoosePhotosClick(View v){
 		
-		final ArrayList<String> selectedItems = imageAdapter.getCheckedItems();
+		ArrayList<String> selectedItems = imageAdapter.getCheckedItems();
+		ShoppingCart cart = new ShoppingCart(context);
+		cart.addToCart(selectedItems);
 		
-		dialog = ProgressDialog.show(context, "", "Uploading file...",true);
-		new Thread(new Runnable(){
-			public void run(){
-				UploadFile(selectedItems);
-			}
-		}).start();
+		Intent iDetails = new Intent(context, Details.class);
+		startActivity(iDetails);
+		
+		
+//		dialog = ProgressDialog.show(context, "", "Uploading file...",true);
+//		new Thread(new Runnable(){
+//			public void run(){
+//				UploadFile(selectedItems);
+//			}
+//		}).start();
+		
 	}
 	
 	public class ImageAdapter extends BaseAdapter{
@@ -198,171 +196,28 @@ public class MyGalleryFragment extends Fragment {
 	}
 	
 	
-	protected int UploadFile(ArrayList<String> sourceFileUri){
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
 		
-//		String sdcard = Environment.getExternalStorageDirectory().toString();
-//	    Log.d("External Storage",sdcard);
-		
-		ConnectionMngr cm = new ConnectionMngr(context);
-		boolean connection = cm.hasConnection();
-		if(!connection){
-			Toast.makeText(context, "No Internet Connection. Please connect to the internet and try again", Toast.LENGTH_LONG).show();
-			return 0;
-		}
+		Button button = (Button) view.findViewById(R.id.button1);
+		button.setOnTouchListener(new OnTouchListener() {
 			
-			String fileName;// = sourceFileUri.get(2).toString();
-			
-			HttpURLConnection conn = null;
-			DataOutputStream dos = null;
-			int bytesRead, bytesAvailable, bufferSize;
-			byte[] buffer;
-			int maxBufferSize = 1*1024*1024;
-			File sourceFile = null;
-				
-				try{
-					// Open a URL connection to the Servelet
-					FileInputStream fileInputStream = null;
-					URL url = new URL(upLoadServerUri);
-					
-					// Open a HTTP connection to the URL
-					conn = (HttpURLConnection)url.openConnection();
-					conn.setDoInput(true); // Allow Inputs
-					conn.setDoOutput(true); // Allow Outputs
-					conn.setUseCaches(false); // Don't use a Cached copy
-					conn.setRequestMethod("POST"); //Sets connection method
-					conn.setRequestProperty("Connection", "Keep-Alive");
-					conn.setRequestProperty("ENCTYPE", "multipart/form-data");					
-					conn.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
-					
-					for(int i=0 ; i<sourceFileUri.size() ; i++){
-						
-						sourceFile = new File(sourceFileUri.get(i));
-						//boolean flag = _ifIsFile(sourceFile);
-						
-						if(!_ifIsFile(sourceFile)){
-							return 0;
-						}
-						
-						fileName = sourceFile.toString();
-						fileInputStream = new FileInputStream(sourceFile);
-						//conn.setRequestProperty("uploaded_file[]", fileName);
-					
-						dos = new DataOutputStream(conn.getOutputStream());
-						
-						dos.writeBytes(twoHypens + boundary + lineEnd);
-						dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file[]\";filename=\"" + fileName+"\""+lineEnd);
-						//dos.writeBytes("Content-Disposition: form-data; name=\"uid\";filename=\"" + "rabin"+"\""+lineEnd);
-						dos.writeBytes(lineEnd);
-						
-						// create a buffer of maximum size
-						bytesAvailable = fileInputStream.available();
-						
-						bufferSize = Math.min(bytesAvailable, maxBufferSize);
-						buffer = new byte[bufferSize];
-						
-						// read file and write it into form
-						bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-						
-						while(bytesRead>0){
-							dos.write(buffer, 0, bufferSize);
-							bytesAvailable = fileInputStream.available();
-							bufferSize = Math.min(bytesAvailable, maxBufferSize);
-							bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-						}
-						//dos.writeBytes(lineEnd);
-						dos.writeBytes(twoHypens + boundary + lineEnd);
-						dos.writeBytes("Content-Disposition: form-data; name=\"uid\";value=\"" + "rabin shrestha" +"\""+lineEnd);
-						dos.writeBytes("Content-Type: text/plain; charset=US-ASCII" + lineEnd);
-						dos.writeBytes("Content-Transfer-Encoding: 8bit" + lineEnd);
-						
-						dos.writeBytes(lineEnd);
-					}
-					// send multipart form data necessary after file data
-					dos.writeBytes(twoHypens+boundary+twoHypens+lineEnd);
-					
-					// Responses from the server(code and message)
-					serverResponseCode = conn.getResponseCode();
-					String serverResponseMessage = conn.getResponseMessage();
-					
-					Log.i("uploadFile","HTTP Response is : "
-	                        + serverResponseMessage + ": " + serverResponseCode);
-					if(serverResponseCode == 200){ //if http response is created
-						getActivity().runOnUiThread(new Runnable(){
-							public void run(){
-								String msg = "File Upload Completed.";
-								//tvMulMsg.setText(msg);
-								Toast toast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
-								toast.show();
-								
-//								ShowDashboard();
-								
-							}
-						});
-					}
-					//close the streams //
-	                fileInputStream.close();
-	                dos.flush();
-	                dos.close();
-				}
-				catch (MalformedURLException ex) {
-	                
-	                dialog.dismiss(); 
-	                ex.printStackTrace();
-	                 
-	                getActivity().runOnUiThread(new Runnable() {
-	                    public void run() {
-	                        tvMulMsg.setText("MalformedURLException Exception : check script url.");
-	                        //Toast.makeText(Gallery.this, "MalformedURLException", Toast.LENGTH_SHORT).show();
-	                    }
-	                });
-	                 
-	                Log.e("Upload file to server", "error: " + ex.getMessage(), ex); 
-	            } catch (Exception e) {
-	                 
-	            	dialog.dismiss(); 
-	                e.printStackTrace();
-	                 
-	                getActivity().runOnUiThread(new Runnable() {
-	                    public void run() {
-	                        tvMulMsg.setText("Got Exception with server");
-	                        //Toast.makeText(context, "Got Exception with server ", Toast.LENGTH_SHORT).show();
-	                    }
-	                });
-	                Log.e("Upload file to server Exception", "Exception : "  + e.getMessage(), e); 
-	            }
-				dialog.dismiss();      
-			return serverResponseCode;
-		}
 
-		public boolean _ifIsFile(File file){
-			if(!file.isFile()){
-				dialog.dismiss();
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
 				
-				Log.e("uploadFile", "Source File not exist : " + imgPath);
-				
-				getActivity().runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-						tvMulMsg.setText("Source File not exist : " + imgPath);
-					}
-				});
+				if(event.getAction() == MotionEvent.ACTION_UP){
+					btnChoosePhotosClick(view);
+				}
 				return false;
 			}
-			return true;
-		}
-//		
-//		public void ShowDashboard(){
-//			finish();
-//			Intent i = new Intent(context, Dashboard.class);
-//			startActivity(i);
-//		}
-//		
-//		@Override
-//	    public boolean onOptionsItemSelected(MenuItem menuItem)
-//	    {       
-//	        ShowDashboard(); 
-//	        return true;
-//	    }
+		});
+		
+	}		
+	    public void setTitle(CharSequence title) {
+	        String mTitle = title.toString();
+	        getActivity().getActionBar().setTitle(mTitle);
+	    }
 	
 }

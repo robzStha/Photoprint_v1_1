@@ -1,5 +1,10 @@
 package jsoft.projects.photoprint_v1_1.libs;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import org.apache.http.NameValuePair;
+
 import jsoft.projects.photoprint_v1_1.MainActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,10 +23,22 @@ public class SessionMngr {
 		prefs = PreferenceManager.getDefaultSharedPreferences(cntx);
 	}
 	
-	
 //	public void setUsername(String username){
 //		prefs.edit().putString("Username", username).commit();
 //		prefs.edit().commit();
+//	}
+	
+	public void setStringArrayList(String key, ArrayList<String> al){
+		prefs.edit().putStringSet(key, new HashSet<String>(al));
+		prefs.edit().commit();
+	}
+	
+//	public ArrayList<String> getStringArrayList(String key){
+//		return new ArrayList<String>(prefs.getStringSet(key, new HashSet<String>()));
+//	}
+//	
+//	public void setNVPArrayList(String key, ArrayList<NameValuePair> nvpAl){
+//		prefs.edit().putStringSet(key, new HashSet<String, String>(nvpAl));
 //	}
 	
 	public void setKeyValues(String key, String value){

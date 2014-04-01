@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,13 +32,14 @@ public class MainActivity extends Activity {
 	// JSON Response node names
 	private static String KEY_SUCCESS = "success";
 	private static String KEY_UID = "uid";
+	private static String KEY_UNAME = "name";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setContentView(R.layout.login);
 		session = new SessionMngr(getApplicationContext());
+		setContentView(R.layout.login);
 		// Importing all assets like buttons, text fields
 		inputEmail = (EditText) findViewById(R.id.etUsername);
 		inputPassword = (EditText) findViewById(R.id.etPassword);
@@ -73,8 +75,8 @@ public class MainActivity extends Activity {
 							JSONObject json_user = json.getJSONObject("user");
 							// Launch Dashboard Screen
 							session.setKeyValues("uid", json_user.getInt(KEY_UID));
+							session.setKeyValues("userName", json_user.getString(KEY_UNAME));
 							
-							//finish();
 							Intent dashboard = new Intent(getApplicationContext(), Dashboard.class);
 							
 							// Close all views before launching Dashboard

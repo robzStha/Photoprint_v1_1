@@ -36,9 +36,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:onClick="btnChoosePhotosClick"
         android:background="@color/btnBg"
         android:textColor="@color/white"
-        android:text="Upload Selected" />
+        android:text="@string/btnSelect" />
  
 </RelativeLayout>

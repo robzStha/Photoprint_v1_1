@@ -16,83 +16,99 @@ package jsoft.projects.photoprint_v1_1;
  * limitations under the License.
  */
 
-import java.util.Locale;
+import java.util.ArrayList;
 
+import jsoft.projects.photoprint_v1_1.adapters.DrawerItem;
+import jsoft.projects.photoprint_v1_1.adapters.DrawerListAdapter;
+import jsoft.projects.photoprint_v1_1.cart.OrderManager;
+import jsoft.projects.photoprint_v1_1.cart.ShoppingCart;
+import jsoft.projects.photoprint_v1_1.libs.SessionMngr;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 /**
  * This is the dashboard where user can view their details and get to menu lists
- * 
- * <p/>
- * <p>When a navigation (left) drawer is present, the host activity should detect presses of
- * the action bar's Up affordance as a signal to open and close the navigation drawer. The
- * ActionBarDrawerToggle facilitates this behavior.
- * Items within the drawer should fall into one of two categories:</p>
- * <p/>
- * <ul>
- * <li><strong>View switches</strong>. A view switch follows the same basic policies as
- * list or tab navigation in that a view switch does not create navigation history.
- * This pattern should only be used at the root activity of a task, leaving some form
- * of Up navigation active for activities further down the navigation hierarchy.</li>
- * <li><strong>Selective Up</strong>. The drawer allows the user to choose an alternate
- * parent for Up navigation. This allows a user to jump across an app's navigation
- * hierarchy at will. The application should treat this as it treats Up navigation from
- * a different task, replacing the current task stack using TaskStackBuilder or similar.
- * This is the only form of navigation drawer that should be used outside of the root
- * activity of a task.</li>
- * </ul>
- * <p/>
- * <p>Right side drawers should be used for actions, not navigation. This follows the pattern
- * established by the Action Bar that navigation should be to the left and actions to the right.
- * An action should be an operation performed on the current contents of the window,
- * for example enabling or disabling a data overlay on top of the current content.</p>
  */
+@SuppressLint("DefaultLocale")
 public class Dashboard extends Activity {
-	private ProgressDialog dialog = null;
+//	private ProgressDialog dialog = null;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
+    
+    private DrawerListAdapter adapter;
+    private ArrayList<DrawerItem> drawerItems;
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
-    private String[] mPlanetTitles;
+    private String[] navList;
+    private TypedArray mIcons;
+    private int uid;
 
-    @Override
+    OrderManager om;
+    
+    SessionMngr session;
+    
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        session = new SessionMngr(getApplicationContext());
+        
+        uid = session.getIntValues("uid");
+        
         setContentView(R.layout.dashboard);
 
+        om = new OrderManager(getApplicationContext());
+        
         mTitle = mDrawerTitle = getTitle();
-        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+        mIcons = getResources().obtainTypedArray(R.array.menu_icons);
+        navList = getResources().getStringArray(R.array.menu_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-
+        
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mPlanetTitles));
+        om.open();
+        int totalCartItems = om.getAllOrderItems(uid).size();
+        om.close();
+        String user = session.getStringValues("userName");
+        navList[2] = user.substring(0,1).toUpperCase()+user.substring(1);
+        
+        drawerItems = new ArrayList<DrawerItem>();
+        
+        for(int i = 0; i<navList.length; i++){
+        	if(i!=4){
+        		drawerItems.add(new DrawerItem(navList[i], mIcons.getResourceId(i, -1)));
+        	}
+        	else{
+        		drawerItems.add(new DrawerItem(navList[i], mIcons.getResourceId(i, -1), true, Integer.toString(totalCartItems))); 
+        	}
+        }
+        
+        mIcons.recycle();
+        
+        adapter = new DrawerListAdapter(getApplicationContext(), drawerItems);
+        mDrawerList.setAdapter(adapter);
+        
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         // enable ActionBar app icon to behave as action to toggle nav drawer
@@ -177,23 +193,25 @@ public class Dashboard extends Activity {
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
     	
-    	
     	Fragment fragment = null;
     	
     	switch(position){
-    		case 0:
+    		case 0:  	// MyGallery
     			fragment = new MyGalleryFragment();
     			break;
-    		case 1:
+    		case 1:		// Facebook
     			fragment = new MyGalleryFragment();
     			break;
-    		case 2:
+    		case 2:		// User
     			fragment = new MyGalleryFragment();
     			break;
-    		case 3:
+    		case 3:		// Order History
     			fragment = new MyGalleryFragment();
     			break;
-    		case 4:
+    		case 4:		// Cart
+    			showCart();
+    			break;
+    		case 5:		// Logout
     			fragment = new MyGalleryFragment();
     			break;
     			
@@ -208,17 +226,20 @@ public class Dashboard extends Activity {
     						.replace(R.id.content_frame, fragment)
     						.commit();
     		
+    		//mDrawerList. navList[position]
+    		
     		mDrawerList.setItemChecked(position, true);
     		mDrawerList.setSelection(position);
-    		setTitle(mPlanetTitles[position]);
+    		setTitle(navList[position]);
     		mDrawerLayout.closeDrawer(mDrawerList);
     	}
     	
 
-    	Toast.makeText(getApplicationContext(), Integer.toString(position), Toast.LENGTH_LONG).show();
+//    	Toast.makeText(getApplicationContext(), Integer.toString(position), Toast.LENGTH_LONG).show();
     	
     }
 
+    
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
@@ -244,5 +265,14 @@ public class Dashboard extends Activity {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }   
     
+    private void showCart(){    	
+    	ArrayList<String> selectedItems = new ArrayList<String>();
+    	ShoppingCart cart = new ShoppingCart(getApplicationContext());
+    	selectedItems = cart.getCartImages();
+    	Log.d("selected Images",selectedItems.toString());
+    	
+    	Intent i = new Intent(this, Details.class);
+		startActivity(i);
+    }
     
 }
