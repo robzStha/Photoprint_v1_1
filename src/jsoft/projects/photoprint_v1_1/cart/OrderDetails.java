@@ -38,6 +38,10 @@ public class OrderDetails {
 		return mugImg;
 	}
 	
+	public void setId(int id){
+		this.id = id;
+	}
+	
 	public void setUid(int uid){
 		this.uid = uid;
 	}

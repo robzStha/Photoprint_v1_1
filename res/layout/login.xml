@@ -72,5 +72,16 @@
         android:textColor="@color/error"
         android:text="" />
 
+    <Button
+        android:id="@+id/btnReg"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btnLogin"
+        android:layout_alignRight="@+id/btnLogin"
+        android:layout_below="@+id/btnLogin"
+        android:layout_marginTop="18dp"
+        android:text="@string/register"
+        android:textColor="@color/white" />
 
 </RelativeLayout>

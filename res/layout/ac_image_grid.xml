@@ -18,7 +18,7 @@
         android:id="@+id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_above="@+id/button1"
+        android:layout_above="@+id/btnViewImg"
         android:layout_below="@+id/tvMulMsg"
         android:columnWidth="100dip"
         android:gravity="center"
@@ -31,7 +31,7 @@
     </GridView>
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/btnViewImg"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

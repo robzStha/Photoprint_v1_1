@@ -20,6 +20,7 @@
             android:id="@+id/list_image"
             android:layout_width="50dip"
             android:layout_height="50dip"
+            android:contentDescription="@string/imgDesc"
             android:src="@drawable/image_for_empty_url" />
         
     </LinearLayout>
@@ -32,7 +33,6 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/thumbnail"
         android:layout_toRightOf="@+id/thumbnail"
-        android:text="Rihanna Love the way lie"
         android:textColor="#040404"
         android:textSize="15sp"
         android:textStyle="bold"

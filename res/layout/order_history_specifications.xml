@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="center_vertical"
+     >
+
+    <TextView
+        android:id="@+id/invoice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="18dp"
+        android:layout_marginTop="18dp"
+        android:text="@string/invoice" />
+
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/imgQty"
+        android:layout_below="@+id/imgQty"
+        android:paddingBottom="20dp"
+        android:text="@string/price" />
+
+    <TextView
+        android:id="@+id/imgQty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/invoice"
+        android:layout_below="@+id/date"
+        android:text="@string/imgQty" />
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/invoice"
+        android:layout_alignBottom="@+id/invoice"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="64dp"
+        android:text="@string/date" />
+
+</RelativeLayout>

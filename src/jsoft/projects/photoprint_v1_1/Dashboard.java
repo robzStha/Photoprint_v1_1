@@ -22,12 +22,12 @@ import jsoft.projects.photoprint_v1_1.adapters.DrawerItem;
 import jsoft.projects.photoprint_v1_1.adapters.DrawerListAdapter;
 import jsoft.projects.photoprint_v1_1.cart.OrderManager;
 import jsoft.projects.photoprint_v1_1.cart.ShoppingCart;
+import jsoft.projects.photoprint_v1_1.libs.ConnectionMngr;
 import jsoft.projects.photoprint_v1_1.libs.SessionMngr;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.SearchManager;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -36,13 +36,18 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.facebook.Session;
 
 /**
  * This is the dashboard where user can view their details and get to menu lists
@@ -53,6 +58,7 @@ public class Dashboard extends Activity {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
+    private int TAKE_PHOTO = 1;
     
     private DrawerListAdapter adapter;
     private ArrayList<DrawerItem> drawerItems;
@@ -64,6 +70,7 @@ public class Dashboard extends Activity {
     private int uid;
 
     OrderManager om;
+    ConnectionMngr cm;
     
     SessionMngr session;
     
@@ -71,6 +78,7 @@ public class Dashboard extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         session = new SessionMngr(getApplicationContext());
+        cm= new ConnectionMngr(getApplicationContext());
         
         uid = session.getIntValues("uid");
         
@@ -87,6 +95,7 @@ public class Dashboard extends Activity {
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
+        
         om.open();
         int totalCartItems = om.getAllOrderItems(uid).size();
         om.close();
@@ -117,6 +126,7 @@ public class Dashboard extends Activity {
 
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
+        
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 mDrawerLayout,         /* DrawerLayout object */
@@ -152,8 +162,8 @@ public class Dashboard extends Activity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+//        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+//        menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -166,23 +176,45 @@ public class Dashboard extends Activity {
         }
         // Handle action buttons
         switch(item.getItemId()) {
-        case R.id.action_websearch:
-            // create intent to perform web search for this planet
-            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-            intent.putExtra(SearchManager.QUERY, getActionBar().getTitle());
-            // catch event that there's no activity to handle intent
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, R.string.app_not_available, Toast.LENGTH_LONG).show();
-            }
-            return true;
+//        case R.id.action_websearch:
+//            // create intent to perform web search for this planet
+//            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+//            intent.putExtra(SearchManager.QUERY, getActionBar().getTitle());
+//            // catch event that there's no activity to handle intent
+//            if (intent.resolveActivity(getPackageManager()) != null) {
+//                startActivity(intent);
+//            } else {
+//                Toast.makeText(this, R.string.app_not_available, Toast.LENGTH_LONG).show();
+//            }
+//            return true;
+		case R.id.action_camera:
+			Intent i = new Intent("android.media.action.IMAGE_CAPTURE");
+			startActivityForResult(i, TAKE_PHOTO);
+        	return true;
         default:
             return super.onOptionsItemSelected(item);
         }
     }
 
-    /* The click listner for ListView in the navigation drawer */
+    
+    
+    
+    @Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+    	if(requestCode == TAKE_PHOTO & resultCode == RESULT_OK){
+			Intent in = getIntent();
+			finish();
+			startActivity(in);
+    	}
+    	
+		super.onActivityResult(requestCode, resultCode, data);
+	}
+
+
+
+
+	/* The click listner for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -200,21 +232,27 @@ public class Dashboard extends Activity {
     			fragment = new MyGalleryFragment();
     			break;
     		case 1:		// Facebook
-    			fragment = new MyGalleryFragment();
+    			Intent i = new Intent(this, FbGallery.class);
+    			startActivity(i);
     			break;
     		case 2:		// User
-    			fragment = new MyGalleryFragment();
+    			fragment = new UserProfile();
     			break;
     		case 3:		// Order History
-    			fragment = new MyGalleryFragment();
+    			if(!cm.isOnline()){
+    				Toast toast = Toast.makeText(getApplicationContext(), "Not connected to network", Toast.LENGTH_LONG);
+    				toast.setGravity(Gravity.TOP, 0, 150);
+    				toast.show();
+    				return;
+    			}
+    			showOrderHistory();
     			break;
     		case 4:		// Cart
     			showCart();
     			break;
     		case 5:		// Logout
-    			fragment = new MyGalleryFragment();
+    			logout();
     			break;
-    			
 			default:
 				break;
     	}
@@ -225,8 +263,6 @@ public class Dashboard extends Activity {
     		fragmentManager.beginTransaction()
     						.replace(R.id.content_frame, fragment)
     						.commit();
-    		
-    		//mDrawerList. navList[position]
     		
     		mDrawerList.setItemChecked(position, true);
     		mDrawerList.setSelection(position);
@@ -269,10 +305,51 @@ public class Dashboard extends Activity {
     	ArrayList<String> selectedItems = new ArrayList<String>();
     	ShoppingCart cart = new ShoppingCart(getApplicationContext());
     	selectedItems = cart.getCartImages();
-    	Log.d("selected Images",selectedItems.toString());
+    	Log.d("selected Images at Line No 298 on Dashboard",selectedItems.toString());
     	
     	Intent i = new Intent(this, Details.class);
 		startActivity(i);
     }
+    
+    private void showOrderHistory(){
+    	Intent i = new Intent(this, OrderHistory.class);
+    	i.putExtra("uid", uid);
+    	startActivity(i);
+    }
+    
+    private void logout(){
+    	session.unsetSession("uid");
+		CookieSyncManager.createInstance(this);
+		CookieManager cm = CookieManager.getInstance();
+		cm.removeAllCookie();
+
+		fbLogout();
+		// End the current activity
+		finish();
+		// Start a new activity
+		Intent i = new Intent(this, MainActivity.class);
+		startActivity(i);
+    }
+    
+    
+    public void fbLogout(){
+		Session session = Session.getActiveSession();
+	    if (session != null) {
+	    	Log.d("fbLogout:","I am in a session with parameters");
+	        if (!session.isClosed()) {
+	        	Log.d("fbLogout:","I am in a open session with parameters");
+	            session.closeAndClearTokenInformation();
+	            //clear your preferences if saved
+	        }
+	    } else {
+	    	Log.d("fbLogout:","I am in a session without parameters");
+	        session = new Session(Dashboard.this);
+	        Session.setActiveSession(session);
+
+	        session.closeAndClearTokenInformation();
+	            //clear your preferences if saved
+
+	    }
+	}
     
 }

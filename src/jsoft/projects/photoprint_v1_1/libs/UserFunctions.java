@@ -9,14 +9,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.util.Log;
 
 public class UserFunctions {
 	
 	private JSONParser jsonParser;
+	private static final String BASE_URL = "http://www.jhamel.com/print/";
 	
-	private static String loginURL = "http://www.jhamel.com/print/ah_login_api/";
-	private static String registerURL = "http://www.jhamel.com/print/ah_login_api/";
+	private static String loginURL = BASE_URL+"ah_login_api/";
+	private static String registerURL = BASE_URL+"ah_login_api/";
 	
 	private static String login_tag = "login";
 	private static String register_tag = "register";
@@ -42,7 +42,7 @@ public class UserFunctions {
 		//Log.d("List", params.toString());
 		JSONObject json = jsonParser.getJSONFromUrl(loginURL, pairs);
 		// return json
-		Log.d("JSON", json.toString());
+//		Log.d("JSON", json.toString());
 		return json;
 	}
 	
@@ -52,17 +52,17 @@ public class UserFunctions {
 	 * @param email
 	 * @param password
 	 * */
-	public JSONObject registerUser(String name, String email, String password){
+	public JSONObject registerUser(String fullName, String username, String email, String password){
 		// Building Parameters
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("tag", register_tag));
-		params.add(new BasicNameValuePair("name", name));
+		params.add(new BasicNameValuePair("fullName", fullName));
+		params.add(new BasicNameValuePair("username", username));
 		params.add(new BasicNameValuePair("email", email));
 		params.add(new BasicNameValuePair("password", password));
 		
 		// getting JSON Object
 		JSONObject json = jsonParser.getJSONFromUrl(registerURL, params);
-		// return json
 		return json;
 	}
 	
@@ -89,4 +89,11 @@ public class UserFunctions {
 		return true;
 	}
 	
+//	public JSONObject orderHistory(int uid){
+//		ohURL = ohURL+"/"+Integer.toString(uid);
+//		JSONObject json = jsonParser.getJSONFromUrl(ohURL);
+//		System.out.println(json);
+//		return json;
+//	}
+//	
 }

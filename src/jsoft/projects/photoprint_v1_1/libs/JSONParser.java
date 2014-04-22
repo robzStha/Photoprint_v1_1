@@ -67,7 +67,7 @@ public class JSONParser {
 			}
 			is.close();
 			json = sb.toString();
-			Log.e("JSONs", json);
+			Log.d("JSONs", json);
 		} catch (Exception e) {
 			Log.e("Buffer Error", "Error converting result " + e.toString());
 		}
@@ -78,9 +78,18 @@ public class JSONParser {
 		} catch (JSONException e) {
 			Log.e("JSON Parser", "Error parsing data " + e.toString());
 		}
-
-		// return JSON String
 		return jObj;
 
 	}
+
+//	public JSONObject getJSONFromUrl(String ohURL) {
+//		CallAPI callApi = new CallAPI(this);
+//		callApi.execute(ohURL);
+//		return null;
+//	}
+//	
+//	public void temp(JSONObject result){
+//		Log.d("Json Object Final: ", result.toString());
+//	}
+	
 }

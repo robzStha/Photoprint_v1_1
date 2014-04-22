@@ -9,6 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import jsoft.projects.photoprint_v1_1.cart.OrderManager;
 import jsoft.projects.photoprint_v1_1.cart.ShoppingCart;
 import jsoft.projects.photoprint_v1_1.libs.ConnectionMngr;
 import jsoft.projects.photoprint_v1_1.libs.SessionMngr;
@@ -20,14 +21,13 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,66 +53,112 @@ public class Details extends Activity{
 	TextView tvMulMsg;
 
 	private List<NameValuePair> nvpSizes;
-	private ArrayList<String> selectedItems = null;
+	private static ArrayList<String> selectedItems = null;
 	private FullScreenImageAdapter adapter;
+	private boolean cartFlag = true;
 	private ViewPager viewPager;
-	
+	private boolean fbImgs=false;
+	ConnectionMngr cm;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
 		session = new SessionMngr(getApplicationContext());
 		cart = new ShoppingCart(getApplicationContext());
-		
+		cm = new ConnectionMngr(getApplicationContext());
 		uid = session.getIntValues("uid");
 		
 		selectedItems = new ArrayList<String>();
 		
+		Intent  intent = getIntent();
+		
+		fbImgs = intent.getBooleanExtra("fbImgs", false);
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<String> orderedItems = (ArrayList<String>) intent.getSerializableExtra("orderedItems");
+		if(orderedItems !=null ){
+			selectedItems = orderedItems;
+			cartFlag = false;
+		}else{
+			selectedItems = cart.getCartImages();
+		}
+//		Log.d("Selected Items in detail Page: Line no 82", selectedItems.toString());
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.details);
 		
+		if(selectedItems.size()>1){
+			Toast.makeText(getApplicationContext(), "Please slide to review your images.", Toast.LENGTH_LONG).show();
+		}
+		
 		// 	If is in database add to the list;
-        selectedItems = cart.getCartImages();
 		
 		viewPager = (ViewPager) findViewById(R.id.pager);
-		
 		Intent i = getIntent();
 		int position = i.getIntExtra("position", 0);
 		adapter = new FullScreenImageAdapter(Details.this, selectedItems);
-		Log.d("positions", adapter.positions.toString());
+		
 		viewPager.setAdapter(adapter);
 		viewPager.setCurrentItem(position);	
+		
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.details_action_bar, menu);
+		if(cartFlag == true){
+			MenuInflater inflater = getMenuInflater();
+			inflater.inflate(R.menu.details_action_bar, menu);
+		}
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
+		
+		Log.d("Selected Items at Line no 110 at Details", selectedItems.toString());
+		
 		nvpSizes = new ArrayList<NameValuePair>();
-		for(int i=0;i<selectedItems.size();i++){
-			nvpSizes.add(new BasicNameValuePair("1", "1")); //qty , sizeId
+		for(int i=0;i<adapter.qty.size();i++){
+			nvpSizes.add(new BasicNameValuePair(Integer.toString(adapter.qty.get(i)),
+					Integer.toString(adapter.sizesIndex.get(i)+1))); //qty , sizeId
 		}
+		
+		cart.updateImgInfo(adapter.sizesIndex, adapter.qty);
 		
 		switch(item.getItemId()){
 			case R.id.action_check_out:
-				dialog = ProgressDialog.show(this, "", "Please wait. Uploading file...",true);
-				new Thread(new Runnable(){
-					public void run(){
-						UploadFile(selectedItems, nvpSizes);
+				
+				if(!cm.isOnline()){
+					Toast toast = Toast.makeText(getApplicationContext(), "Not connected to network", Toast.LENGTH_LONG);
+					toast.setGravity(Gravity.TOP, 0, 150);
+					toast.show();
+					return false;
+				}
+				if(selectedItems.size()>0){
+					dialog = ProgressDialog.show(this, "", "Please wait. Uploading file...",true);
+					new Thread(new Runnable(){
+						public void run(){
+							
+								UploadFile(selectedItems, nvpSizes);
+						}
+					}).start();
 					}
-				}).start();
+				else{
+					Toast.makeText(getApplicationContext(), "No items in cart please add some from above links.", Toast.LENGTH_LONG).show();
+				}
 				break;
 			case R.id.action_add_more:
-				Spinner mSpinner = (Spinner) findViewById(R.id.sizes);
-//				mSpinner.getSelectedItem();
-				System.out.println(mSpinner.getSelectedItemPosition());
+				selectedItems = null;
 				Intent intent = new Intent(Details.this, Dashboard.class);
+				
 				startActivity(intent);
+				break;
+			case R.id.action_delete_cart:
+				OrderManager om = new OrderManager(getApplicationContext());
+				om.open();
+				om.delOrderDetails();
+				om.delOrderItem();
+				om.close();
+				Intent i = new Intent(Details.this, Dashboard.class);
+				startActivity(i);
 				break;
 			default:
 				break;
@@ -122,14 +168,7 @@ public class Details extends Activity{
 	}
 	
 
-protected int UploadFile(ArrayList<String> sourceFileUri, List<NameValuePair> nvpSizes){
-		
-		ConnectionMngr cm = new ConnectionMngr(Details.this);
-		boolean connection = cm.hasConnection();
-		if(!connection){
-			Toast.makeText(Details.this, "No Internet Connection. Please connect to the internet and try again", Toast.LENGTH_LONG).show();
-			return 0;
-		}
+	protected int UploadFile(ArrayList<String> sourceFileUri, List<NameValuePair> nvpSizes){
 		
 			String fileName;// = sourceFileUri.get(2).toString();
 			
@@ -227,12 +266,16 @@ protected int UploadFile(ArrayList<String> sourceFileUri, List<NameValuePair> nv
 						runOnUiThread(new Runnable(){
 							public void run(){
 								String msg = "File Upload Completed.";
-								Toast toast = Toast.makeText(Details.this, msg, Toast.LENGTH_SHORT);
-								toast.show();
-								dialog.dismiss();
+								Toast.makeText(Details.this, msg, Toast.LENGTH_SHORT).show();
 								
+								ShoppingCart cart = new ShoppingCart(getApplicationContext());
+								cart.deleteItems();
+								if(fbImgs == true){
+									DeleteFbImages();
+								}
+								dialog.dismiss();
 								Intent i = new Intent(Details.this, Dashboard.class);
-								startActivity(i);								
+								startActivity(i);						
 							}
 						});
 					}
@@ -267,26 +310,72 @@ protected int UploadFile(ArrayList<String> sourceFileUri, List<NameValuePair> nv
 	                });
 	                Log.e("Upload file to server Exception", "Exception : "  + e.getMessage(), e); 
 	            }
-				dialog.dismiss();      
+				dialog.dismiss();
 			return serverResponseCode;
 		}
 
-		public boolean _ifIsFile(File file){
-			if(!file.isFile()){
-				dialog.dismiss();
-				
-				Log.e("uploadFile", "Source File not exist : " + imgPath);
-				
-				runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-						tvMulMsg.setText("Source File not exist : " + imgPath);
-					}
-				});
-				return false;
+	public boolean _ifIsFile(File file){
+		if(!file.isFile()){
+			dialog.dismiss();
+			if(checkForURLFile(file.toString())){
+				return true;
 			}
-			return true;
+			
+			Log.e("uploadFile", "Source File not exist : " + imgPath);
+			
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					tvMulMsg.setText("Source File not exist : " + imgPath);
+				}
+			});
+			return false;
 		}
+		return true;
+	}
 	
+	public static void DeleteFbImages(){
+		
+		for(int i=0 ;i< selectedItems.size();i++){
+			String delImg = Environment.getExternalStorageDirectory().toString()+"/fb_images/fb_image"+i+".jpg";
+			DeleteFile(delImg);
+		}
+		
+		File path = new File (Environment.getExternalStorageDirectory().toString()+"/fb_images");
+		if(path.exists()){
+			path.delete();
+		}
+		
+	}
+	
+	public static void DeleteFile(String fileName){
+		File file = new File(fileName);
+		if(!file.exists()){
+			System.out.println("not exists");
+			return;
+		}
+		if(!file.isDirectory()){
+			System.out.println("Deleted");
+			file.delete();
+			return;
+		}
+	}
+	
+	public boolean checkForURLFile(String url){
+			try {
+			      HttpURLConnection.setFollowRedirects(false);
+			      // note : you may also need
+			      //        HttpURLConnection.setInstanceFollowRedirects(false)
+			      HttpURLConnection con =
+			         (HttpURLConnection) new URL(url).openConnection();
+			      con.setRequestMethod("HEAD");
+			      return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+			    }
+			    catch (Exception e) {
+			       e.printStackTrace();
+			       return false;
+			    }
+			
+		}
 }

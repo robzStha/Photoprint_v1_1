@@ -29,7 +29,7 @@ public class ShoppingCart {
 		for(int i=0;i<selectedItems.size();i++){
 			oi = om.insert(selectedItems.get(i));
 			long insertId = oi.getId(); // order item id
-			int size = 1;//Integer.parseInt(nvpSizes.get(i).getValue()); 	default value for size
+			int size = 0;//Integer.parseInt(nvpSizes.get(i).getValue()); 	default value for size
 			int qty = 1;//Integer.parseInt(nvpSizes.get(i).getName());		default value for qty
 			String mugImg = null;
 			om.insert(insertId, size, qty, mugImg);
@@ -64,6 +64,32 @@ public class ShoppingCart {
 		oi = om.getAllOrderItems(uid);
 		om.close();
 		return oi;
+	}
+	
+	public void deleteItems(){
+		OrderManager om = new OrderManager(context);
+		om.open();
+		om.delOrderItem();
+		om.close();
+	}
+	
+	public ArrayList<OrderDetails> getCartItemDetails(int oiid){
+		OrderManager om = new OrderManager(context);
+		om.open();
+		ArrayList<OrderDetails> od = new ArrayList<OrderDetails>();
+		od = om.getAllOrderDetailsByOIID(oiid);
+		om.close();
+		return od;
+	}
+	
+	public void updateImgInfo(ArrayList<Integer> sizes, ArrayList<Integer> qty){
+		OrderManager om = new OrderManager(context);
+		om.open();
+		ArrayList<OrderDetails> oi = om.getAllOrderDetails(uid);
+		for(int i=0; i<oi.size(); i++){
+			long id = oi.get(i).getId();
+			om.updateImageInfo(sizes.get(i),qty.get(i), id);
+		}
 	}
 
 }

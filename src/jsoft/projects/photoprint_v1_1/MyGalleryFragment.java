@@ -15,6 +15,7 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -27,13 +28,14 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
-public class MyGalleryFragment extends Fragment {
+public class MyGalleryFragment extends Fragment{
 	
 	public ImageLoader imageLoader = ImageLoader.getInstance();
 	
@@ -42,9 +44,10 @@ public class MyGalleryFragment extends Fragment {
 	public MyGalleryFragment(){}
 	
 	public String imgPath = null;
-//	String upLoadServerUri = "http://www.jhamel.com/print/ah_login_api/UploadToServer.php";
 	
 	SessionMngr session;
+	
+	GridView gridView;
 	
 	String lineEnd = "\r\n";
 	String twoHypens = "--";
@@ -55,13 +58,21 @@ public class MyGalleryFragment extends Fragment {
 	private ArrayList<String> imageUrls;
 	private DisplayImageOptions options;
 	private ImageAdapter imageAdapter;
+	View rootView;
 		
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
 		context = container.getContext();
 		
-		View rootView = inflater.inflate(R.layout.ac_image_grid, container, false);
+		rootView = inflater.inflate(R.layout.ac_image_grid, container, false);
+		return rootView;
+	}
+	
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		
+		super.onCreate(savedInstanceState);
 		
 		final String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID };
         final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
@@ -90,12 +101,12 @@ public class MyGalleryFragment extends Fragment {
         
         imageAdapter = new ImageAdapter(context, imageUrls);
         
-        GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
+        gridView = (GridView) rootView.findViewById(R.id.gridview);		
         gridView.setAdapter(imageAdapter);
-        
-		return rootView;
 	}
-	
+
+
+
 	@Override
 	public void onStop() {
 		imageLoader.stop();
@@ -108,18 +119,16 @@ public class MyGalleryFragment extends Fragment {
 		ShoppingCart cart = new ShoppingCart(context);
 		cart.addToCart(selectedItems);
 		
-		Intent iDetails = new Intent(context, Details.class);
-		startActivity(iDetails);
-		
-		
-//		dialog = ProgressDialog.show(context, "", "Uploading file...",true);
-//		new Thread(new Runnable(){
-//			public void run(){
-//				UploadFile(selectedItems);
-//			}
-//		}).start();
+		if(selectedItems.size()>0){		
+			Intent iDetails = new Intent(context, Details.class);
+			startActivity(iDetails);
+		}else {
+			Toast.makeText(context, "No any images is selected", Toast.LENGTH_SHORT).show();
+		}
 		
 	}
+	
+	
 	
 	public class ImageAdapter extends BaseAdapter{
 		
@@ -167,7 +176,7 @@ public class MyGalleryFragment extends Fragment {
 				convertView = mInflater.inflate(R.layout.row_multiphoto_item, null);
 			}
 			
-			CheckBox mCheckBox = (CheckBox) convertView.findViewById(R.id.checkBox1);
+			final CheckBox mCheckBox = (CheckBox) convertView.findViewById(R.id.checkBox1);
 			
 			final ImageView imageView =(ImageView) convertView.findViewById(R.id.imageView1);
 			
@@ -180,12 +189,23 @@ public class MyGalleryFragment extends Fragment {
 	            }
 	        });
 
+			imageView.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					
+					boolean flag = (mCheckBox.isChecked()) ? false : true;
+					mCheckBox.setChecked(flag);
+				}
+			});
+			
 	        mCheckBox.setTag(position);
 	        mCheckBox.setChecked(msparseBooleanArray.get(position));
 	        mCheckBox.setOnCheckedChangeListener(mCheckedChangeListener);
 
 	        return convertView;
 		}
+		
 		OnCheckedChangeListener mCheckedChangeListener = new OnCheckedChangeListener() {
 			 
 	        @Override
@@ -200,7 +220,7 @@ public class MyGalleryFragment extends Fragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 		
-		Button button = (Button) view.findViewById(R.id.button1);
+		Button button = (Button) view.findViewById(R.id.btnViewImg);
 		button.setOnTouchListener(new OnTouchListener() {
 			
 

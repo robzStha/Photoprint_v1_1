@@ -11,6 +11,7 @@
 	    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	    <uses-permission android:name="android.permission.CAMERA"></uses-permission>
 
     <application
         android:allowBackup="true"
@@ -32,7 +33,6 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.DASHBOARD" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>        
@@ -42,6 +42,16 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.DETAILS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="jsoft.projects.photoprint_v1_1.Login"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.LOGIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -58,10 +68,30 @@
         </activity>
         
         <activity
+            android:name="jsoft.projects.photoprint_v1_1.OrderHistory"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.ORDERHISTORY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <activity
             android:name="jsoft.projects.photoprint_v1_1.MyGallery"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MYGALLERY" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="jsoft.projects.photoprint_v1_1.UserRegistration"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.USERREGISTRATION" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -84,7 +114,6 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.FBLOGIN" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

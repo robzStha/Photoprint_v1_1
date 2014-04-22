@@ -3,13 +3,11 @@ package jsoft.projects.photoprint_v1_1.cart;
 import java.util.ArrayList;
 
 import jsoft.projects.photoprint_v1_1.libs.SessionMngr;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 
 public class OrderManager {
@@ -61,22 +59,6 @@ public class OrderManager {
 	}
 	
 	
-//	/* Get all the ordered items */
-//	public ArrayList<OrderItems> getAllOrderItems(){
-//		ArrayList<OrderItems> oi = new ArrayList<OrderItems>();
-//		Cursor cursor = db.query(MySQLiteHelper.TBL_ORDER_ITEMS,
-//				tblOrderItemsCols,
-//				null, null, null, null, null);
-//		cursor.moveToFirst();
-//		while(!cursor.isAfterLast()){
-//			OrderItems orderItems = cursorToOrderItems(cursor);
-//			oi.add(orderItems);
-//			cursor.moveToNext();
-//		}
-//		cursor.close();
-//		return oi;
-//	}
-	
 	/* Get all the ordered items of an specific user*/
 	public ArrayList<OrderItems> getAllOrderItems(int uid){
 		ArrayList<OrderItems> oi = new ArrayList<OrderItems>();
@@ -96,12 +78,24 @@ public class OrderManager {
 		return oi;
 	}
 	
+	public ArrayList<OrderDetails> getAllOrderDetailsByOIID(int oiid){
+		ArrayList<OrderDetails> od = new ArrayList<OrderDetails>();
+		String where = MySQLiteHelper.COLUMN_OIID+"="+oiid;
+		Cursor cursor = db.query(MySQLiteHelper.TBL_ORDER_DETAILS, tblOrderDetailsCols, where, null, null, null, null);
+		cursor.moveToFirst();
+		while(!cursor.isAfterLast()){
+			OrderDetails orderDetails = cursorToOrderDetails(cursor);
+			od.add(orderDetails);
+			cursor.moveToNext();
+		}
+		return od;
+	}
+	
 	
 	/** Delete the ordered items **/
-	public void delOrderItem(OrderItems oi){
-		long id = oi.getId();
-		Log.d("Deleted id : ", Long.toString(id));
-		db.delete(MySQLiteHelper.TBL_ORDER_ITEMS, MySQLiteHelper.COLUMN_OIID +" = "+ id, null);
+	public void delOrderItem(){
+		db.delete(MySQLiteHelper.TBL_ORDER_ITEMS, MySQLiteHelper.FLD_UID +" = "+ uid, null);
+		delOrderDetails();
 	}
 	
 	private OrderItems cursorToOrderItems(Cursor cursor){
@@ -133,6 +127,7 @@ public class OrderManager {
 	
 	public OrderDetails cursorToOrderDetails(Cursor cursor){
 		OrderDetails od = new OrderDetails();
+		od.setId(cursor.getInt(0));
 		od.setUid(cursor.getInt(1)); // 1 for user id
 		od.setOrderItemId(cursor.getInt(2));
 		od.setSize(cursor.getInt(3));
@@ -155,9 +150,16 @@ public class OrderManager {
 		cursor.close();
 		return od;
 	}
-	public void delOrderDetails(OrderDetails od){
-		long id = od.getId();
-		Log.d("Deleted id : ", Long.toString(id));
-		db.delete(MySQLiteHelper.TBL_ORDER_DETAILS, MySQLiteHelper.COLUMN_ODID +" = "+ id, null);
+	public void delOrderDetails(){
+//		long id = od.getId();
+		db.delete(MySQLiteHelper.TBL_ORDER_DETAILS, MySQLiteHelper.FLD_UID+" = "+ uid, null);
+	}
+	
+	public void updateImageInfo(int size, int qty, long id){
+		String where = "_id = "+id;
+		ContentValues cv = new ContentValues();
+		cv.put("fld_size", size);
+		cv.put("fld_qty", qty);
+		db.update(MySQLiteHelper.TBL_ORDER_DETAILS, cv, where, null);
 	}
 }

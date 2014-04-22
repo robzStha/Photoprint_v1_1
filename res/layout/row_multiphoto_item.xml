@@ -7,13 +7,16 @@
         android:id="@+id/imageView1"
         android:layout_width="100dp"
         android:layout_height="100dp"
+        android:padding="1dp"
+        android:contentDescription="@string/imgDesc"
         android:src="@drawable/ic_launcher" />
 
     <CheckBox
         android:id="@+id/checkBox1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true" />
+        android:layout_alignBottom="@+id/imageView1"
+        android:layout_alignRight="@+id/imageView1"
+        android:layout_marginBottom="14dp" />
  
 </RelativeLayout>

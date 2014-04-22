@@ -1,49 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout_fullsceen_image"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
  
-    <ImageView
-        android:id="@+id/imgDisplay"
+    <TableRow
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginBottom="100dp"
-        android:scaleType="fitCenter" />
-
-    <Spinner
-        android:id="@+id/sizes"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="69dp" />
-
-    <EditText
-        android:id="@+id/etQty"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/sizes"
-        android:layout_toRightOf="@+id/sizes"
-        android:text="1"
-        android:inputType="number"
-        android:digits="0123456789"
-        android:ems="10" />
-
-    <TextView
-        android:id="@+id/tvSizes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/sizes"
-        android:layout_alignParentLeft="true"
-        android:text="Size" />
-
-    <TextView
-        android:id="@+id/tvPieces"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/sizes"
-        android:layout_marginLeft="66dp"
-        android:layout_toRightOf="@+id/tvSizes"
-        android:text="Piece/s" />
- 
-</RelativeLayout>
+        android:gravity="center_horizontal"
+        >
+        <ImageView
+	        android:id="@+id/imgDisplay"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	        android:contentDescription="@string/imgDesc"
+	        android:layout_span="2"
+	        android:scaleType="fitCenter" />
+        
+    </TableRow>
+    <TableRow>
+        <TextView
+	        android:id="@+id/tvSizes"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:padding="5dp"
+	        android:text="@string/size" />
+	
+	    <TextView
+	        android:id="@+id/tvPieces"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:padding="5dp"
+	        android:text="@string/piece" />
+    </TableRow>
+    <TableRow>
+        <Spinner
+	        android:id="@+id/sizes"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="69dp" />
+	
+	    <EditText
+	        android:id="@+id/etQty"
+	        android:layout_width="60dp"
+	        android:layout_height="wrap_content"
+	        android:text="@string/one"
+	        android:inputType="number"
+	        android:digits="0123456789"
+	        android:ems="10" />
+    </TableRow>
+    <TableRow>
+        <TextView
+            android:layout_span = "2"
+            android:id="@+id/tvCurrentState"
+            android:layout_width="fill_parent"
+            android:gravity="center"
+            android:text=""
+            />
+    </TableRow>
+     
+</TableLayout>

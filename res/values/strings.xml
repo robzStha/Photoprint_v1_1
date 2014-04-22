@@ -23,7 +23,7 @@
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_websearch">Web search</string>
     <string name="app_not_available">Sorry, there\'s no web browser available</string>
-    <string name="btnSelect">Select</string>
+    <string name="btnSelect">Add to Cart</string>
     <string name="cart">Cart</string>
     <string name="add_more">Add More</string>
     <string name="desc_list_item_icon">Icons</string>
@@ -39,13 +39,38 @@
 	</string-array>
 	
 	<array name="menu_icons">
-        <item>@drawable/ic_action_select_all</item>
-        <item>@drawable/ic_action_new</item>
-        <item>@drawable/ic_action_user</item>
-        <item>@drawable/ic_action_new</item>
-        <item>@drawable/cart</item>
-        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_select_all</item>	<!-- My Gallery -->
+        <item>@drawable/facebook_icon</item>		<!-- Facebook -->
+        <item>@drawable/ic_action_user</item>		<!-- User -->
+        <item>@drawable/ic_action_new</item>		<!-- Order History	 -->
+        <item>@drawable/cart</item>					<!-- Cart -->
+        <item>@drawable/ic_action_new</item>		<!-- Logout -->
     </array>
     
-    
+    <string name="invoice">Invoice: </string>
+	<string name="date">Date: </string>
+	<string name="imgQty">No of Images: </string>
+	<string name="price">Price: </string>
+	<string name="viewImg">View Images: </string>  
+	<string name="imgDesc">Photo print Images</string>
+	<string name="sizeHere">Sizes Here</string>
+	
+	<string name="one">1</string>
+	<string name="size">Size: </string>
+	<string name="piece">Piece/s</string>
+	<string name="name">Name</string>
+	<string name="username">Username</string>
+	<string name="contact_num">Contact Number</string>
+	
+	<string name="email">Email</string>
+	<string name="country">Country</string>
+	<string name="state">State</string>
+	<string name="city">City</string>
+	<string name="myself">Myself</string>
+	<string name="qty">Qty: </string>
+	<string name="register">Register</string>
+	<string name="deleteAll">Delete All</string>
+	<string name="camera">Camera</string>
+	<string name="fullName">Full Name</string>
+	<string name="submit">Submit</string>
 </resources>

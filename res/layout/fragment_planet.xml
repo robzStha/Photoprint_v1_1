@@ -20,4 +20,5 @@
     android:layout_height="match_parent"
     android:background="#000000"
     android:gravity="center"
+    android:contentDescription="@string/imgDesc"
     android:padding="32dp" />
