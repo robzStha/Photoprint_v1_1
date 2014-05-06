@@ -59,7 +59,7 @@ public class MyGalleryFragment extends Fragment{
 	private DisplayImageOptions options;
 	private ImageAdapter imageAdapter;
 	View rootView;
-		
+	
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		

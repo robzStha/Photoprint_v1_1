@@ -35,7 +35,7 @@ public class MySQLiteHelper extends SQLiteOpenHelper{
 			+ " integer primary key autoincrement, " + FLD_UID
 			+ " integer not null, "  + FLD_ORDER_ITEM
 			+ " integer not null, " + FLD_SIZE
-			+ " integer not null, " + FLD_QTY
+			+ " s not null, " + FLD_QTY
 			+ " integer not null, " + FLD_MUGPRINT_IMG
 			+ " string)";
 	

@@ -12,6 +12,7 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
 
 public class FbLogin extends Activity{
 

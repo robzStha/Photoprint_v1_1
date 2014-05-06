@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import jsoft.projects.photoprint_v1_1.cart.OrderManager;
 import jsoft.projects.photoprint_v1_1.cart.ShoppingCart;
@@ -17,6 +18,7 @@ import jsoft.projects.photoprint_v1_1.libs.SessionMngr;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.R.integer;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -28,6 +30,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +63,7 @@ public class Details extends Activity{
 	private ViewPager viewPager;
 	private boolean fbImgs=false;
 	ConnectionMngr cm;
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		session = new SessionMngr(getApplicationContext());
@@ -113,15 +117,19 @@ public class Details extends Activity{
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		
-		Log.d("Selected Items at Line no 110 at Details", selectedItems.toString());
-		
 		nvpSizes = new ArrayList<NameValuePair>();
-		for(int i=0;i<adapter.qty.size();i++){
-			nvpSizes.add(new BasicNameValuePair(Integer.toString(adapter.qty.get(i)),
-					Integer.toString(adapter.sizesIndex.get(i)+1))); //qty , sizeId
-		}
+			for(String key : adapter.checkedQty.keySet()){
+				String size = key.substring(3);
+				nvpSizes.add(new BasicNameValuePair(adapter.checkedQty.get(key),size)); //qty , sizeId
+				Log.d("Checked Count:",key+"=>"+adapter.checkedQty.get(key));
+			}
 		
-		cart.updateImgInfo(adapter.sizesIndex, adapter.qty);
+		
+		
+		Log.d("Checked Values",adapter. checked.toString());
+		Log.d("Checked Qty", adapter.checkedQty.toString());
+		
+		cart.updateImgInfo(adapter.checked, adapter.checkedQty);
 		
 		switch(item.getItemId()){
 			case R.id.action_check_out:
@@ -136,8 +144,7 @@ public class Details extends Activity{
 					dialog = ProgressDialog.show(this, "", "Please wait. Uploading file...",true);
 					new Thread(new Runnable(){
 						public void run(){
-							
-								UploadFile(selectedItems, nvpSizes);
+							UploadFile(selectedItems, nvpSizes);
 						}
 					}).start();
 					}
@@ -147,8 +154,8 @@ public class Details extends Activity{
 				break;
 			case R.id.action_add_more:
 				selectedItems = null;
+				finish();
 				Intent intent = new Intent(Details.this, Dashboard.class);
-				
 				startActivity(intent);
 				break;
 			case R.id.action_delete_cart:
@@ -210,23 +217,40 @@ public class Details extends Activity{
 						}
 						
 						fileName = sourceFile.toString();
+						
+						OrderManager om = new OrderManager(getApplicationContext());
+						om.open();
+						long oiid = om.getOrderItemIdByImage(fileName);
+						om.close();
+						
 						fileInputStream = new FileInputStream(sourceFile);
 						//conn.setRequestProperty("uploaded_file[]", fileName);
-					
-						String qty = nvpSizes.get(i).getName().toString();
-						String size = nvpSizes.get(i).getValue().toString();
+						
+						String qty;
+						String size;
+						for(int j=0;j<nvpSizes.size();j++){
+							qty = nvpSizes.get(j).getName();
+							size = nvpSizes.get(j).getValue();
+							
+							String[] tokens = size.split("_");
+							if(Long.parseLong(tokens[0]) == oiid){
+							
+								dos.writeBytes(twoHypens + boundary + lineEnd);
+								dos.writeBytes("Content-Disposition: form-data; name=\"size[]\""+lineEnd);
+								dos.writeBytes(lineEnd);
+								dos.writeBytes(size);
+								dos.writeBytes(lineEnd);
+								dos.writeBytes(twoHypens + boundary + lineEnd);
+								dos.writeBytes("Content-Disposition: form-data; name=\"qty[]\""+lineEnd);
+								dos.writeBytes(lineEnd);
+								dos.writeBytes(qty);
+								dos.writeBytes(lineEnd);
+							}
+						}
+						
+//						dos.writeBytes(lineEnd);
 						dos.writeBytes(twoHypens + boundary + lineEnd);
-						dos.writeBytes("Content-Disposition: form-data; name=\"size[]\""+lineEnd);
-						dos.writeBytes(lineEnd);
-						dos.writeBytes(size);
-						dos.writeBytes(lineEnd);
-						dos.writeBytes(twoHypens + boundary + lineEnd);
-						dos.writeBytes("Content-Disposition: form-data; name=\"qty[]\""+lineEnd);
-						dos.writeBytes(lineEnd);
-						dos.writeBytes(qty);
-						dos.writeBytes(lineEnd);
-						dos.writeBytes(twoHypens + boundary + lineEnd);
-						dos.writeBytes("Content-Disposition: form-data; data-size=\""+size+"\";data-qty=\""+qty+"\"; name=\"uploaded_file[]\";filename=\"" + fileName+"\""+lineEnd);
+						dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file[]\";filename=\"" + fileName+"\""+lineEnd);
 						//dos.writeBytes("Content-Disposition: form-data; name=\"uid\";filename=\"" + "rabin"+"\""+lineEnd);
 						dos.writeBytes(lineEnd);
 						
@@ -270,6 +294,7 @@ public class Details extends Activity{
 								
 								ShoppingCart cart = new ShoppingCart(getApplicationContext());
 								cart.deleteItems();
+								finish();
 								if(fbImgs == true){
 									DeleteFbImages();
 								}
@@ -366,7 +391,7 @@ public class Details extends Activity{
 			try {
 			      HttpURLConnection.setFollowRedirects(false);
 			      // note : you may also need
-			      //        HttpURLConnection.setInstanceFollowRedirects(false)
+			      // HttpURLConnection.setInstanceFollowRedirects(false)
 			      HttpURLConnection con =
 			         (HttpURLConnection) new URL(url).openConnection();
 			      con.setRequestMethod("HEAD");
@@ -378,4 +403,14 @@ public class Details extends Activity{
 			    }
 			
 		}
+	
+	public void onCheckboxClicked(View view){
+    	boolean checked = ((CheckBox) view).isChecked();
+    	if(checked)
+    	Toast.makeText(getApplicationContext(), Long.toString(view.getId()), Toast.LENGTH_LONG).show();
+    	
+    	switch(view.getId()){
+    		
+    	}
+    }
 }

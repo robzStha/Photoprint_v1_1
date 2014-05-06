@@ -281,7 +281,7 @@ public class FbPhotos extends BaseActivity {
 						null);
 			}
 
-			CheckBox mCheckBox = (CheckBox) convertView
+			final CheckBox mCheckBox = (CheckBox) convertView
 					.findViewById(R.id.checkBox1);
 
 			final ImageView imageView = (ImageView) convertView
@@ -297,6 +297,16 @@ public class FbPhotos extends BaseActivity {
 							anim.start();
 						}
 					});
+			
+			imageView.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					
+					boolean flag = (mCheckBox.isChecked()) ? false : true;
+					mCheckBox.setChecked(flag);
+				}
+			});
 
 			mCheckBox.setTag(position);
 			mCheckBox.setChecked(msparseBooleanArray.get(position));

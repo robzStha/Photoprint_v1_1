@@ -5,7 +5,7 @@ public class OrderDetails {
 	private long id;
 	private int uid;
 	private int orderItemId;
-	private int size;
+	private String size;
 	private int qty;
 	private double price;
 	private String mugImg;
@@ -22,7 +22,7 @@ public class OrderDetails {
 		return orderItemId;
 	}
 	
-	public int getSize(){
+	public String getSize(){
 		return size;
 	}
 	
@@ -50,7 +50,7 @@ public class OrderDetails {
 		this.orderItemId = orderItemId;
 	}
 	
-	public void setSize(int size){
+	public void setSize(String size){
 		this.size = size;
 	}
 	

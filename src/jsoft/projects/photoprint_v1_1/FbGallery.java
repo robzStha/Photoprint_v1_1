@@ -3,6 +3,7 @@ package jsoft.projects.photoprint_v1_1;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -16,13 +17,13 @@ import android.content.Intent;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.facebook.Request;
 import com.facebook.Response;
@@ -32,49 +33,52 @@ import com.facebook.model.GraphUser;
 
 public class FbGallery extends BaseActivity implements OnItemSelectedListener{
 	
-//	Session session;
+	Session session;
 	
 	private static final String SELECT = "Please select an album";
 	private ArrayList<String> albumLinks, albumIds;
+	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
+		session = new Session(getApplicationContext());
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
-		
-		Session.openActiveSession(FbGallery.this, true, new Session.StatusCallback() {
-			@SuppressWarnings("deprecation")
-			@Override
-			public void call(final Session session, SessionState state, Exception exception) {
-				if (session.isOpened() && session!=null) 
-			    {
-
-			        if (session.isOpened()) {
-			            // make request to the /me API
-//			        	session.requestNewPublishPermissions(
-//								new Session.NewPermissionsRequest(FbGallery.this, "user_photos"));
-			            Request.executeMeRequestAsync(session, new Request.GraphUserCallback() 
-			            {
-			            	// 	callback after Graph API response with user object
-			            	@Override
-				            public void onCompleted(GraphUser user, Response response) {
-					            if (user != null) {
-					            	Toast.makeText(getApplicationContext(), "Opening Gallery", Toast.LENGTH_SHORT).show();
-					                gallery(session);
-					            }
-			            	}
-		            	});
-		            }else {
-						Toast.makeText(getApplicationContext(), "Gone to Else", Toast.LENGTH_SHORT).show();
-					}
-			    }
-			}
-		});
-		
+//		if(!session.isOpened() && !session.isClosed()){
+//			session.openForRead(new Session.OpenRequest(FbGallery.this)
+//            .setPermissions(Arrays.asList("user_photos"))
+//            .setCallback(statusCallback));
+//		}else{
+			Session.openActiveSession(FbGallery.this, true, new Session.StatusCallback() {
+				@SuppressWarnings("deprecation")
+				@Override
+				public void call(final Session session, SessionState state, Exception exception) {
+					if (session.isOpened() && session!=null) 
+				    {
+	
+				        if (session.isOpened()) {
+				            // make request to the /me API
+	//			        	session.requestNewPublishPermissions(
+	//								new Session.NewPermissionsRequest(FbGallery.this, "user_photos"));
+				            Request.executeMeRequestAsync(session, new Request.GraphUserCallback() 
+				            {
+				            	// 	callback after Graph API response with user object
+				            	@Override
+					            public void onCompleted(GraphUser user, Response response) {
+						            if (user != null) {
+						                gallery(session);
+						            }
+				            	}
+			            	});
+			            }
+				    }
+				}
+			});
+//		}
 	}
 
 	@Override
@@ -179,5 +183,33 @@ public class FbGallery extends BaseActivity implements OnItemSelectedListener{
 		finish();
         return true;
     }
+	
+	private class SessionStatusCallback implements Session.StatusCallback {
+		@SuppressWarnings("deprecation")
+	    @Override
+	    public void call(final Session session, SessionState state, Exception exception) {
+			
+			
+			Log.d("Going to gallery","Going to gallery");
+	    	if (session.isOpened() && session!=null) 
+		    {
+
+		        if (session.isOpened()) {
+		            // make request to the /me API
+		            Request.executeMeRequestAsync(session, new Request.GraphUserCallback() 
+		            {
+		            	// 	callback after Graph API response with user object
+		            	@Override
+			            public void onCompleted(GraphUser user, Response response) {
+				            if (user != null) {
+				            	Log.d("Going to gallery","Going to gallery");
+				                gallery(session);
+				            }
+		            	}
+	            	});
+	            }
+		    }
+	    }
+	}
 	
 }	

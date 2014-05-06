@@ -73,4 +73,20 @@
 	<string name="camera">Camera</string>
 	<string name="fullName">Full Name</string>
 	<string name="submit">Submit</string>
+	
+	<string name="size1">3.25 x 4.5</string>
+	<string name="size2">3.5 x 8.1</string>
+	<string name="size3">3.9 x 5.8</string>
+	<string name="size4">4.7 x 9.3</string>
+	<string name="size5">5.8 x 7.9</string>
+	<string name="size6">4 x 6</string>
+	
+	<string name="price1">5</string>
+	<string name="price2">10</string>
+	<string name="price3">15</string>
+	<string name="price4">20</string>
+	<string name="price5">25</string>
+	<string name="price6">30</string>
+	
+	<string name="priceTag">Price</string>
 </resources>

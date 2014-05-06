@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 
 public class OrderManager {
@@ -106,7 +107,7 @@ public class OrderManager {
 		return oi;		
 	}
 	
-	public OrderDetails insert(long orderItemId, int size, int qty, String mugImg){
+	public OrderDetails insert(long orderItemId, String size, int qty, String mugImg){
 		ContentValues valOD = new ContentValues();
 		valOD.put(MySQLiteHelper.FLD_ORDER_ITEM, orderItemId);
 		valOD.put(MySQLiteHelper.FLD_UID,uid);
@@ -130,7 +131,7 @@ public class OrderManager {
 		od.setId(cursor.getInt(0));
 		od.setUid(cursor.getInt(1)); // 1 for user id
 		od.setOrderItemId(cursor.getInt(2));
-		od.setSize(cursor.getInt(3));
+		od.setSize(cursor.getString(3));
 		od.setQty(cursor.getInt(4));
 		od.setMugImg(cursor.getString(5));
 		return od;
@@ -155,11 +156,39 @@ public class OrderManager {
 		db.delete(MySQLiteHelper.TBL_ORDER_DETAILS, MySQLiteHelper.FLD_UID+" = "+ uid, null);
 	}
 	
-	public void updateImageInfo(int size, int qty, long id){
+	public void delOrderDetailsByOIID(long oiid){
+		String where = MySQLiteHelper.FLD_UID+"="+uid+" and "+MySQLiteHelper.FLD_ORDER_ITEM+"="+oiid;
+		db.delete(MySQLiteHelper.TBL_ORDER_DETAILS, where, null);
+	}
+	
+//	public void updateImageInfo(int size, int qty, long id){
+//		String where = "_id = "+id;
+//		ContentValues cv = new ContentValues();
+//		cv.put("fld_size", size);
+//		cv.put("fld_qty", qty);
+//		db.update(MySQLiteHelper.TBL_ORDER_DETAILS, cv, where, null);
+//	}
+	
+	public void updateImageInfo(String size, String qty, long id, String dbSize){
 		String where = "_id = "+id;
 		ContentValues cv = new ContentValues();
 		cv.put("fld_size", size);
 		cv.put("fld_qty", qty);
 		db.update(MySQLiteHelper.TBL_ORDER_DETAILS, cv, where, null);
 	}
+	
+	public long getOrderItemIdByImage(String image){
+		long id = 0;
+		String where =  MySQLiteHelper.FLD_IMG +" = '"+image+"'";
+		String sortBy = MySQLiteHelper.COLUMN_OIID + " DESC";
+		Cursor cursor = db.query(MySQLiteHelper.TBL_ORDER_ITEMS,
+				tblOrderItemsCols,
+				where, null, null, null, sortBy);
+		if(cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			id = cursor.getLong(cursor.getColumnIndex(MySQLiteHelper.COLUMN_OIID));
+		}
+		return id;
+	}
+	
 }
